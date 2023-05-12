@@ -6,11 +6,14 @@ The need for creational design patterns arises from the fact that creating objec
 ## Reasons
 There are several reasons why you might want to use creational design patterns in your software project. 
  * One common reason is to improve the scalability of the application. 
+    
     By separating the creation logic from the rest of the code, you can make it easier to add new types of objects as the application grows. 
+
  * Additionally, creational patterns can help make your code more testable.
+    
     Since they allow you to isolate the object creation logic from the rest of the application.
 
-
+## How
 To use a creational design pattern, you typically define a separate class or module that encapsulates the creation logic. This class or module provides a standard interface for creating objects, which can be called by other parts of the application as needed.
 
 The implementation of the pattern can vary depending on the specific requirements of the application, but the goal is always to provide a flexible and reusable way to create objects.
