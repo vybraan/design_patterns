@@ -3,8 +3,10 @@ package org.bawker.dev;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -80,21 +82,23 @@ public class App{
             response = response.replaceAll("NAME_TOPVOTED", voting.getTopCandidate().getName());
             response = response.replaceAll("VOTES_TOPVOTED", voting.getTopCandidate().getVotes()+"");
 
-            String rowComplete = "";
-            String rowTemplate ="""
-                                        <tr>
-                                            <td>01</td>
-                                            <td>02</td>
-                                            <td>03</td>
-                                            <td>04</td>
-                                        </tr>""";
+            StringBuilder rowComplete = new StringBuilder();
+            String rowTemplate =
+                                """
+                                <tr>
+                                    <td>01</td>
+                                    <td>02</td>
+                                    <td>03</td>
+                                    <td>04</td>
+                                </tr>""";
+
             for (Candidate c : voting.getCandidates()) {
-                rowComplete += rowTemplate.replaceAll("01", c.getName())
-                        .replaceAll("02", c.getVotes()+"")
+                rowComplete.append(rowTemplate.replaceAll("01", c.getName())
+                        .replaceAll("02", c.getVotes() + "")
                         .replaceAll("03", c.getAffiliation())
-                        .replaceAll("04", c.getId()+"");
+                        .replaceAll("04", c.getId() + ""));
             }
-            response = response.replaceAll("TROWS_VOTED", rowComplete);
+            response = response.replaceAll("TROWS_VOTED", rowComplete.toString());
 
             httpExchange.sendResponseHeaders(200, response.getBytes().length);
             OutputStream outputStream = httpExchange.getResponseBody();
@@ -113,24 +117,15 @@ public class App{
 
                 String formData = new String(data, StandardCharsets.UTF_8);
 
-                System.out.println("Data received: "+formData);
-
                 String[] data1 = formData.split("&");
                 data1[0] = data1[0].replaceAll("name=", "");
                 data1[1] = data1[1].replaceAll("age=", "");
                 data1[2] = data1[2].replaceAll("affiliation=", "");
-                System.out.println(data1[0]+" "+data1[1]+" "+data1[2]);
                 data1[0] = data1[0].replace((char) 43,' ');
 
                 voting.createCandidate(new Candidate(data1[0], Integer.parseInt(data1[1]), data1[2]));
 
-//                String response = "Thank you";
-//
-//                httpExchange.sendResponseHeaders(200, response.getBytes().length);
-//
-//                OutputStream outputStream = httpExchange.getResponseBody();
-//                outputStream.write(response.getBytes());
-//                outputStream.close();
+
             }
 
             File file = new File("candidate.html");
@@ -160,19 +155,10 @@ public class App{
 
                 String formData = new String(data, StandardCharsets.UTF_8);
 
-                System.out.println("Data received: "+formData);
-
                 formData = formData.replaceAll("id=", "");
                 System.out.println(formData);
                 int id = Integer.parseInt(formData);
                 voting.addVote(id);
-                String response = "Thank you";
-//
-//                httpExchange.sendResponseHeaders(200, response.getBytes().length);
-//
-//                OutputStream outputStream = httpExchange.getResponseBody();
-//                outputStream.write(response.getBytes());
-//                outputStream.close();
             }
 
 

@@ -32,12 +32,12 @@ public class Voting {
         Candidate candidate = voteStorage.get(id);
         candidate.Vote();
         voteStorage.put(candidate.getId(), candidate);
-        Logger.getInstance().logInfo("The "+ candidate.getName()+" was voted");
+        Logger.getInstance().logInfo("The candidate"+ candidate.getName()+" was voted");
 
     }
 
     public List<Candidate> getCandidates(){
-        Logger.getInstance().logInfo("Printing the list of candidates");
+//        Logger.getInstance().logInfo("Getting the list of candidates");
 
         return new ArrayList<>(voteStorage.values());
     }
