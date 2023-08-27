@@ -62,4 +62,9 @@ public class Voting {
         }
         return top;
     }
+
+    public void deleteCandidate(int id){
+        voteStorage.remove(id);
+    }
+
 }
