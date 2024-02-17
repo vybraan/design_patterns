@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class Voting {
     private static volatile Voting instance;
-    private Map<Integer, Candidate> voteStorage;
+    private final Map<Integer, Candidate> voteStorage;
 
     private Voting(){
         voteStorage = new HashMap<>();

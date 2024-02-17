@@ -43,7 +43,7 @@ public class Logger {
                 fileWriter.write(logMessage);
                 fileWriter.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Logger.getInstance().logError(e.getMessage());
             }
         }
     }

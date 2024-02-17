@@ -64,7 +64,7 @@ public class App{
                 }
             }
         } catch (SocketException e) {
-            e.printStackTrace();
+            logger.logError(e.getMessage());
         }
         return "";
     }
