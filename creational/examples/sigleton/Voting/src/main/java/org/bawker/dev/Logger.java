@@ -3,6 +3,7 @@ package org.bawker.dev;
 import java.io.*;
 import java.text.*;
 import java.util.*;
+import java.util.TimeZone;
 
 public class Logger {
 
@@ -42,6 +43,7 @@ public class Logger {
                 FileWriter fileWriter = new FileWriter(logFileName, true);
                 fileWriter.write(logMessage);
                 fileWriter.close();
+
             } catch (IOException e) {
                 Logger.getInstance().logError(e.getMessage());
             }
@@ -62,6 +64,7 @@ public class Logger {
 
     private String getCurrentTimeStamp() {
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        sdfDate.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date now = new Date();
         return sdfDate.format(now);
     }

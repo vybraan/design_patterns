@@ -15,11 +15,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Scanner;
 
-public class App{
+public class App {
 
     public static final Logger logger = Logger.getInstance();
     public static final Voting voting = Voting.getInstance();
-
 
 
     public static void main(String[] args) throws IOException {
@@ -34,31 +33,34 @@ public class App{
         server.createContext("/", new RootHandler());
         server.createContext("/vote", new SubmitHandler());
         server.createContext("/candidate", new CandidateHandler());
+        server.createContext("/delete", new DeleteCandidateHandler());
         server.setExecutor(null); // To use the default
         server.start();
 
         message = "Starting server";
         logger.logInfo(message);
-        System.out.println("[*] "+message+"...");
+        System.out.println("[*] " + message + "...");
         logger.logInfo("Started on: ");
-        logger.logInfo("[*] "+InetAddress.getByName("localhost") + ":" + port);
+        logger.logInfo("[*] " + InetAddress.getByName("localhost") + ":" + port);
         logger.logInfo(printAddresses(port));
         System.out.println("[*] Started on:");
-        System.out.println("[*] "+InetAddress.getByName("localhost") + ":" + port);
-        System.out.println(printAddresses(port));;
+        System.out.println("[*] " + InetAddress.getByName("localhost") + ":" + port);
+        System.out.println(printAddresses(port));
+
         logger.logWarning("Multiple Interfaces detected");
 
     }
 
-    public static String printAddresses(int port){
+    //rewrite and optimize the function bellow
+    public static String printAddresses(int port) {
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()){
+            while (interfaces.hasMoreElements()) {
                 NetworkInterface ni = interfaces.nextElement();
                 Enumeration<InetAddress> addresses = ni.getInetAddresses();
-                while (addresses.hasMoreElements()){
+                while (addresses.hasMoreElements()) {
                     InetAddress address = addresses.nextElement();
-                    if (!address.isLinkLocalAddress() && !ni.getName().startsWith("lo")){
+                    if (!address.isLinkLocalAddress() && !ni.getName().startsWith("lo")) {
                         return "[*] " + address.getHostAddress() + ":" + port;
                     }
                 }
@@ -70,7 +72,7 @@ public class App{
     }
 
 
-     static class RootHandler implements HttpHandler{
+    static class RootHandler implements HttpHandler {
 
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
@@ -80,17 +82,17 @@ public class App{
 
             String response = reader.next();
             response = response.replaceAll("NAME_TOPVOTED", voting.getTopCandidate().getName());
-            response = response.replaceAll("VOTES_TOPVOTED", voting.getTopCandidate().getVotes()+"");
+            response = response.replaceAll("VOTES_TOPVOTED", voting.getTopCandidate().getVotes() + "");
 
             StringBuilder rowComplete = new StringBuilder();
             String rowTemplate =
-                                """
-                                <tr>
-                                    <td>01</td>
-                                    <td>02</td>
-                                    <td>03</td>
-                                    <td>04</td>
-                                </tr>""";
+                    """
+                            <tr>
+                                <td>01</td>
+                                <td>02</td>
+                                <td>03</td>
+                                <td>04</td>
+                            </tr>""";
 
             for (Candidate c : voting.getCandidates()) {
                 rowComplete.append(rowTemplate.replaceAll("01", c.getName())
@@ -107,11 +109,11 @@ public class App{
         }
     }
 
-    static class CandidateHandler implements HttpHandler{
+    static class CandidateHandler implements HttpHandler {
 
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
-            if (httpExchange.getRequestMethod().equalsIgnoreCase("POST")){
+            if (httpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 InputStream inputStream = httpExchange.getRequestBody();
                 byte[] data = inputStream.readAllBytes();
 
@@ -121,7 +123,7 @@ public class App{
                 data1[0] = data1[0].replaceAll("name=", "");
                 data1[1] = data1[1].replaceAll("age=", "");
                 data1[2] = data1[2].replaceAll("affiliation=", "");
-                data1[0] = data1[0].replace((char) 43,' ');
+                data1[0] = data1[0].replace((char) 43, ' ');
 
                 voting.createCandidate(new Candidate(data1[0], Integer.parseInt(data1[1]), data1[2]));
 
@@ -134,7 +136,7 @@ public class App{
 
             String response = reader.next();
             response = response.replaceAll("NAME_TOPVOTED", voting.getTopCandidate().getName());
-            response = response.replaceAll("VOTES_TOPVOTED", voting.getTopCandidate().getVotes()+"");
+            response = response.replaceAll("VOTES_TOPVOTED", voting.getTopCandidate().getVotes() + "");
 
 
             httpExchange.sendResponseHeaders(200, response.getBytes().length);
@@ -144,12 +146,12 @@ public class App{
         }
     }
 
-    static  class SubmitHandler implements HttpHandler {
+    static class SubmitHandler implements HttpHandler {
 
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
 
-            if (httpExchange.getRequestMethod().equalsIgnoreCase("POST")){
+            if (httpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 InputStream inputStream = httpExchange.getRequestBody();
                 byte[] data = inputStream.readAllBytes();
 
@@ -167,6 +169,39 @@ public class App{
             reader.useDelimiter("\\Z");
 
             String response = reader.next();
+
+            httpExchange.sendResponseHeaders(200, response.getBytes().length);
+            OutputStream outputStream = httpExchange.getResponseBody();
+            outputStream.write(response.getBytes());
+            outputStream.close();
+        }
+    }
+
+    static class DeleteCandidateHandler implements HttpHandler {
+
+        @Override
+        public void handle(HttpExchange httpExchange) throws IOException {
+
+            if (httpExchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                InputStream inputStream = httpExchange.getRequestBody();
+                byte[] data = inputStream.readAllBytes();
+
+                String formData = new String(data, StandardCharsets.UTF_8);
+
+                formData = formData.replaceAll("id=", "");
+                System.out.println(formData);
+                int id = Integer.parseInt(formData);
+                voting.deleteCandidate(id);
+            }
+
+
+            File file = new File("delete.html");
+            Scanner reader = new Scanner(file);
+            reader.useDelimiter("\\Z");
+
+            String response = reader.next();
+            response = response.replaceAll("NAME_TOPVOTED", voting.getTopCandidate().getName());
+            response = response.replaceAll("VOTES_TOPVOTED", voting.getTopCandidate().getVotes() + "");
 
             httpExchange.sendResponseHeaders(200, response.getBytes().length);
             OutputStream outputStream = httpExchange.getResponseBody();
